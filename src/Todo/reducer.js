@@ -3,7 +3,7 @@ import { SET_JOB, ADD_JOB, DELETE_JOB, DELETE_ALL_JOB, FIX_JOB } from './constan
 // Init state
 export const initState = {
     job: '',
-    listJobs: []
+    listJobs: JSON.parse(localStorage.getItem('Jobs')) ?? []
 }
 
 // Reducer
@@ -22,6 +22,9 @@ const reducer = (state, action) => {
                 ...state,
                 listJobs: [...state.listJobs, action.payload]
             }
+
+            localStorage.setItem('Jobs', JSON.stringify(newState.listJobs))
+
             break
         case DELETE_JOB:
             const newListJobs = [...state.listJobs]
@@ -32,12 +35,22 @@ const reducer = (state, action) => {
                 ...state,
                 listJobs: newListJobs
             }
+
+            if (newState.listJobs) {
+                localStorage.setItem('Jobs', JSON.stringify(newState.listJobs))
+            } else {
+                localStorage.setItem('Jobs', '[]')
+            }
+
             break
         case DELETE_ALL_JOB:
             newState = {
                 job: '',
                 listJobs: []
             }
+
+            localStorage.setItem('Jobs', '[]')
+
             break
         case FIX_JOB:
             const updateListJobs = [...state.listJobs]
@@ -46,7 +59,6 @@ const reducer = (state, action) => {
 
             newState = {
                 job: action.payload,
-                // ...state,
                 listJobs: updateListJobs
             }
             break

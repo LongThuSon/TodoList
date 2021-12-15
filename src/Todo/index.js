@@ -1,6 +1,9 @@
 import { useReducer, useState, useEffect, useRef } from 'react'
 import reducer, { initState } from './reducer'
-import { setJob, addJob, deleteJob, deleteAllJob, fixJob } from './actions'
+
+import TextField from './textField'
+import DeleteAllBtn from './deleteAllBtn'
+import TodoList from './TodoList'
 
 import './styleTodo/index.css'
 
@@ -8,137 +11,62 @@ function App() {
     const [state, dispatch] = useReducer(reducer, initState)
     const { job, listJobs } = state
 
-    const inputRef = useRef()
-    const deleteRef = useRef()
-    const deleteAllRef = useRef()
-    const checkedRef = useRef([])
-
     const [hidedAdd, setHidedAdd] = useState(true)
-    const [hidedDelete, setHidedDelete] = useState(true)
     const [hidedDeleteAll, setHidedDeleteAll] = useState(true)
-    const [hideCheckBox, setHidedCheckBox] = useState(true) 
-    const [testCheckBox, setTestCheckBox] = useState([]) 
 
-    // let isChecked = false
+    // Keyboard
+    const useKey = (key, cb) => {
+        const callbackRef = useRef(cb);
 
-    const handleInput = (e) => {
-        if (e.target.value.length !== 0) {
-            setHidedAdd(false)
-        } else {
-            setHidedAdd(true)
-        }
-        dispatch(setJob(e.target.value))
+        useEffect(() => {
+            callbackRef.current = cb;
+        })
+
+        useEffect(() => {
+            const handleKey = (e) => {
+                if (e.code === key) {
+                    callbackRef.current(e)
+                }
+            }
+
+            document.addEventListener('keypress', handleKey);
+            return () => document.removeEventListener('keypress', handleKey)
+        }, [key])
     }
 
-    const handleSubmit = () => {
-        dispatch(addJob(job))
-        dispatch(setJob(''))
-        inputRef.current.focus()
-        setHidedAdd(true)
-    }
-
-    const handleDelete = (nothing, index) => {
-        console.log(checkedRef.curent[0])
-    }
-
-    // const handleCheck = (index) => {
-    //     // if (checkedRef.current[index]) {
-    //     //     setTestCheckBox(testCheckBox.push(index))
-    //     // }
-        
-    // }
-
-    useEffect(() => {
-        inputRef.current.focus()
-    })
-
+    // Ẩn / hiện DeleteAll Button
     useEffect(() => {
         if (listJobs.length !== 0) {
             setHidedDeleteAll(false)
         } else {
             setHidedDeleteAll(true)
-
         }
     }, [listJobs.length])
 
     return (
         <div className='main'>
-            <h3>Todo</h3>
+            <h3>TODO LIST</h3>
 
-            <input
-                type='checkbox'
-                onClick={() => {
-                    if (!hideCheckBox) {     
-                        setHidedCheckBox(true)
-                        setHidedDelete(true)
-                    } else {
-                        setHidedCheckBox(false)
-                        setHidedDelete(false)
-                    }
-                }}
+            <TextField
+                job={job}
+                hidedAdd={hidedAdd}
+                setHidedAdd={setHidedAdd}
+                dispatch={dispatch}
+                useKey={useKey}
             />
 
-            <input
-                ref={inputRef}
-                value={job}
-                placeholder="Enter todo..."
-                onChange={handleInput}
+            <DeleteAllBtn
+                hidedDeleteAll={hidedDeleteAll}
+                dispatch={dispatch}
             />
 
-            <button
-                onClick={handleSubmit}
-                disabled={hidedAdd}
-            >
-                Add
-            </button>
+            <TodoList 
+                listJobs={listJobs}
+                dispatch={dispatch}
+                setHidedAdd={setHidedAdd}
+            />           
 
-            <button
-                ref={deleteRef}
-                onClick={handleDelete}
-                disabled={hidedDelete}
-            >
-                Delete
-            </button>
-
-            <button
-                ref={deleteAllRef}
-                onClick={() => dispatch(deleteAllJob())}
-                disabled={hidedDeleteAll}
-            >
-                Delete All
-            </button>
-
-            <ul>
-                {listJobs.map((job, index) => (
-                    <li key={index}>
-                        <input
-                            ref={item => checkedRef.current[index] = item}
-                            type='checkbox'
-                            hidden={hideCheckBox}
-                            onClick={() => {
-                                setTestCheckBox(oldArray => [...oldArray, index])
-                                console.log(index, testCheckBox)
-                                
-                            }}
-                        />
-
-                        {job}
-
-                        <span onClick={() => dispatch(deleteJob(index))}>
-                            &times;
-                        </span>
-
-                        <span onClick={() => {
-                            dispatch(fixJob(job, index))
-                            setHidedAdd(false)
-                        }}
-                        >
-                            &gt;
-                        </span>
-                    </li>
-                ))}
-            </ul>
-        </div>
+        </div >
     );
 }
 
