@@ -1,5 +1,5 @@
-import {  useRef, memo  } from 'react'
-import {  deleteAllJob  } from './actions'
+import { useRef, memo } from 'react'
+import { deleteAllJob } from './actions'
 
 import Button from '@atlaskit/button'
 
@@ -8,11 +8,11 @@ function DeleteAllBtn({ hidedDeleteAll, dispatch }) {
 
     return (
         <Button
+            ref={deleteAllRef}
             style={{
                 float: 'right',
                 margin: '4px 4px 0'
             }}
-            ref={deleteAllRef}
             onClick={() => dispatch(deleteAllJob())}
             isDisabled={hidedDeleteAll}
             appearance='primary'
